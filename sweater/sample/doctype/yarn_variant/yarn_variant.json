@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-26 10:14:34.651145",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "yarn_composition",
+  "column_break_ixad",
+  "colour",
+  "column_break_mnmi",
+  "quantity"
+ ],
+ "fields": [
+  {
+   "fieldname": "yarn_composition",
+   "fieldtype": "Link",
+   "label": "Yarn Composition",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_ixad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "colour",
+   "fieldtype": "Link",
+   "label": "Colour",
+   "link_filters": "{\n  \"attribute\": \"Color\"\n}",
+   "options": "Item Attribute Value"
+  },
+  {
+   "fieldname": "column_break_mnmi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "label": "Quantity"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-04 23:14:56.435652",
+ "modified_by": "Administrator",
+ "module": "Sample",
+ "name": "Yarn Variant",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

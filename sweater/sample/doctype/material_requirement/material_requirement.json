@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-27 10:00:19.797195",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "category",
+  "column_break_kope",
+  "yarn_composition",
+  "column_break_fzgi",
+  "yarn_count",
+  "column_break_hzsv",
+  "quantity",
+  "column_break_lqbx",
+  "uom",
+  "column_break_rnsj",
+  "colour",
+  "section_break_avio",
+  "required_by"
+ ],
+ "fields": [
+  {
+   "default": "YARN",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Material Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "column_break_kope",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "yarn_composition",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_fzgi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "yarn_count",
+   "fieldtype": "Data",
+   "label": "Count"
+  },
+  {
+   "fieldname": "column_break_hzsv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "column_break_lqbx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_rnsj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "colour",
+   "fieldtype": "Data",
+   "label": "Colour"
+  },
+  {
+   "fieldname": "section_break_avio",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "required_by",
+   "fieldtype": "Date",
+   "label": "Required By"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-04 23:15:29.697457",
+ "modified_by": "Administrator",
+ "module": "Sample",
+ "name": "Material Requirement",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
