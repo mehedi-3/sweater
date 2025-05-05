@@ -5,6 +5,16 @@ app_description = "Sweater factory specific"
 app_email = "mehedi.abdullah.cse@gmail.com"
 app_license = "mit"
 
+fixtures = [
+    "Custom Field",
+    "Property Setter",
+    # "Custom Script",
+    "Print Format",
+    # "Workflow",
+    "Role",
+]
+
+
 # Apps
 # ------------------
 
