@@ -496,9 +496,8 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-05-04 23:14:32.267999",
+ "modified": "2025-05-06 22:40:17.226058",
  "modified_by": "Administrator",
  "module": "Sample",
  "name": "Sample Request",
@@ -515,7 +514,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {
@@ -527,7 +525,6 @@
    "report": 1,
    "role": "Merchandiser",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {
@@ -573,7 +570,6 @@
    "report": 1,
    "role": "General Manager (Marketing & Merchandising)",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

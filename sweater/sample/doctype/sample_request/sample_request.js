@@ -1,141 +1,60 @@
-// Copyright (c) 2025, Mehedi Abdullah and contributors
-// For license information, please see license.txt
+// =======================================
+// Sample Request Client Script
+// Copyright (c) 2025, Mehedi Abdullah
+// =======================================
+// This script handles:
+// - Auto-filling requested_by, request_date
+// - Populating workstation details
+// - Auto-creating Item & Yarn Items on save
+// - Style filtering for style_name link field
+// =======================================
 
 frappe.ui.form.on('Sample Request', {
-    onload: function(frm) {
+    onload(frm) {
         set_requested_by(frm);
         set_request_date(frm);
         set_style_filter(frm);
-
-        // Set dropdown options for process_name and process_type
-        frappe.meta.get_docfield("Workstation Details", "process_name", frm.doc.name).options =
-            "Design\nKnitting\nKnitting Manual\nLinking\nMending\nWash\nPrint\nIron\nSewing\nZip / Button\nPrint\nFinishing";
-
-        frappe.meta.get_docfield("Workstation Details", "process_type", frm.doc.name).options =
-            "Chart\nSwatch\nPanel\nBody";
-
-                // Autofill workstation_details child table if it's empty
-        const default_process_names = [
-            "Design", "Knitting", "Knitting Manual", "Linking", "Mending",
-            "Wash", "Print", "Iron", "Sewing", "Zip / Button", "Print", "Finishing"
-        ];
-        const process_types = ["Chart", "Swatch", "Panel", "Body"];  // Possible values
-
-        if (!frm.doc.workstation_details || frm.doc.workstation_details.length === 0) {
-            default_process_names.forEach(process_name => {
-                let child = frm.add_child("workstation_details");
-
-                child.process_name = process_name;
-
-                // Random process_type
-                child.process_type = process_types[Math.floor(Math.random() * process_types.length)];
-            });
-            frm.refresh_field("workstation_details");
-        }
-
+        setup_workstation_details(frm);
     },
 
-    refresh: function(frm) {
-        // Don't override 'requested_by' with the email
+    refresh(frm) {
         frm.set_value("request_date", frappe.datetime.now_datetime());
-    
-        frm.add_custom_button(__('Create Items'), function () {
-            frm.trigger('create_items');
-        });
-    
-        frm.add_custom_button(__('Create Yarn Items'), function () {
-            frm.trigger('create_yarn_items');
-        });
+
+        frm.add_custom_button(__('Create Items'), () => frm.trigger('create_items'));
+        frm.add_custom_button(__('Create Yarn Items'), () => frm.trigger('create_yarn_items'));
     },
 
-    before_save: function(frm) {
-        
+    before_save(frm) {
         if (!frm.doc.item_category || !frm.doc.customer || !frm.doc.style) {
             frappe.msgprint("Please fill in the required fields: Item Category, Customer, and Style.");
             frappe.validated = false;
             return;
         }
 
-        let item_code = `${frm.doc.item_category} - ${frm.doc.customer} - ${frm.doc.style}`.toUpperCase();
-        let item_name = item_code;
+        const item_code = `${frm.doc.item_category} - ${frm.doc.customer} - ${frm.doc.style}`.toUpperCase();
+        const item_name = item_code;
 
-        function createItem(item_code, item_name, success_message, additional_fields = {}) {
-            frappe.call({
-                method: "frappe.client.insert",
-                args: {
-                    doc: Object.assign({
-                        doctype: "Item",
-                        item_code: item_code,
-                        item_name: item_name.toUpperCase(),
-                        item_group: frm.doc.item_category,
-                        description: `Item for Customer: ${frm.doc.customer}`,
-                        stock_uom: "Nos",
-                        is_stock_item: 1,
-                        is_sweater: 1,
-                        item_category: frm.doc.item_category,
-                    }, additional_fields)
-                },
-                callback: function (r) {
-                    if (r.message) {
-                        console.log("Item created successfully:", r.message);
-                        frappe.msgprint(success_message);
-                    } else {
-                        console.log("Failed to create item:", r);
-                    }
-                }
-            });
-        }
+        create_if_not_exists(item_code, item_name, {
+            is_sweater: 1,
+            item_group: frm.doc.item_category,
+            description: `Item for Customer: ${frm.doc.customer}`,
+        }, "Sweater item created successfully!");
 
-        // Create Sweater Item
-        frappe.call({
-            method: "frappe.client.get_list",
-            args: {
-                doctype: "Item",
-                filters: { "item_code": item_code },
-                fields: ["name"]
-            },
-            callback: function (r) {
-                if (r.message.length === 0) {
-                    createItem(item_code, item_name, "Sweater item created successfully!", { is_sweater: 1 });
-                } else {
-                    console.log("Sweater item already exists:", item_code);
-                }
+        // Handle Yarn Items
+        (frm.doc.material_requirement || []).forEach(row => {
+            if (row.category?.toLowerCase() === "yarn" && row.yarn_composition && row.yarn_count) {
+                const yarn_code = `YARN - ${frm.doc.customer} - ${frm.doc.style} - ${row.yarn_composition} - ${row.yarn_count}`.toUpperCase();
 
-                // Create Yarn Items
-                if (frm.doc.material_requirement && frm.doc.material_requirement.length > 0) {
-                    frm.doc.material_requirement.forEach(row => {
-                        if (row.category && row.category.toLowerCase() === "yarn" && row.yarn_composition && row.yarn_count) {
-                            let yarn_item_code = `YARN - ${frm.doc.customer} - ${frm.doc.style} - ${row.yarn_composition} - ${row.yarn_count}`.toUpperCase();
-                            let yarn_item_name = yarn_item_code;
-
-                            frappe.call({
-                                method: "frappe.client.get_list",
-                                args: {
-                                    doctype: "Item",
-                                    filters: { "item_code": yarn_item_code },
-                                    fields: ["name"]
-                                },
-                                callback: function (r) {
-                                    if (r.message.length === 0) {
-                                        console.log("Creating Yarn Item:", yarn_item_code);
-                                        createItem(yarn_item_code, yarn_item_name, "Yarn item created successfully!", {
-                                            item_group: "Yarn",
-                                            description: `Yarn Composition: ${row.yarn_composition}, Yarn Count: ${row.yarn_count}`
-                                        });
-                                    } else {
-                                        console.log("Yarn item already exists:", yarn_item_code);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
+                create_if_not_exists(yarn_code, yarn_code, {
+                    item_group: "Yarn",
+                    description: `Yarn Composition: ${row.yarn_composition}, Yarn Count: ${row.yarn_count}`
+                }, "Yarn item created successfully!");
             }
         });
     }
 });
 
-
+// Utility: Set Requested By if not already filled
 function set_requested_by(frm) {
     if (!frm.doc.requested_by) {
         frappe.call({
@@ -143,35 +62,87 @@ function set_requested_by(frm) {
             args: {
                 doctype: "Employee",
                 filters: { user_id: frappe.session.user },
-                fields: ["name", "employee_name"], // only fields allowed on client-side
+                fields: ["name", "employee_name"],
                 limit_page_length: 1
             },
-            callback: function (response) {
-                if (response.message && response.message.length > 0) {
-                    let employee = response.message[0];
-                    
-                    frm.set_value("requested_by", employee.name); // Link field needs docname
-                    frm.set_df_property("requested_by", "description", employee.employee_name); // Show the name in description
+            callback({ message }) {
+                if (message?.length) {
+                    const emp = message[0];
+                    frm.set_value("requested_by", emp.name);
+                    frm.set_df_property("requested_by", "description", emp.employee_name);
                 } else {
-                    frappe.msgprint(__('No Employee record found for this user.'));
+                    frappe.msgprint("No Employee record found for this user.");
                 }
             }
         });
     }
 }
 
+// Utility: Set Request Date
 function set_request_date(frm) {
     if (!frm.doc.request_date) {
         frm.set_value("request_date", frappe.datetime.now_datetime());
     }
 }
 
+// Utility: Style Name filter based on SWEATER group
 function set_style_filter(frm) {
-    frm.set_query("style_name", function () {
-        return {
-            filters: {
-                "item_group": "SWEATER"  // Uppercase as you mentioned
+    frm.set_query("style_name", () => ({
+        filters: { item_group: "SWEATER" }
+    }));
+}
+
+// Utility: Setup default workstation processes
+function setup_workstation_details(frm) {
+    const process_names = [
+        "Design", "Knitting", "Knitting Manual", "Linking", "Mending",
+        "Wash", "Print", "Iron", "Sewing", "Zip / Button", "Print", "Finishing"
+    ];
+    const process_types = ["Chart", "Swatch", "Panel", "Body"];
+
+    frappe.meta.get_docfield("Workstation Details", "process_name", frm.doc.name).options = process_names.join("\n");
+    frappe.meta.get_docfield("Workstation Details", "process_type", frm.doc.name).options = process_types.join("\n");
+
+    if (!frm.doc.workstation_details?.length) {
+        process_names.forEach(name => {
+            let row = frm.add_child("workstation_details");
+            row.process_name = name;
+            row.process_type = process_types[Math.floor(Math.random() * process_types.length)];
+        });
+        frm.refresh_field("workstation_details");
+    }
+}
+
+// Utility: Create Item if not exists
+function create_if_not_exists(item_code, item_name, fields, success_message) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Item",
+            filters: { item_code },
+            fields: ["name"]
+        },
+        callback({ message }) {
+            if (!message.length) {
+                frappe.call({
+                    method: "frappe.client.insert",
+                    args: {
+                        doc: Object.assign({
+                            doctype: "Item",
+                            item_code,
+                            item_name,
+                            stock_uom: "Nos",
+                            is_stock_item: 1,
+                            item_category: fields.item_category || "Sweater"
+                        }, fields)
+                    },
+                    callback(r) {
+                        if (r.message) {
+                            frappe.msgprint(success_message);
+                        }
+                    }
+                });
             }
-        };
+        }
     });
 }
